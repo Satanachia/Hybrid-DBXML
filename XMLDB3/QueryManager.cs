@@ -14,6 +14,7 @@
         private ChannelingKeyPoolAdapter m_ChannelingKeyPool;
         private CharacterAdapter m_CharacterAdapter;
         private CharIdPoolAdapter m_CharacterIdPool;
+
         private ChronicleAdapter m_ChronicleAdapter;
         private CountryReportAdapter m_CountryReportAdapter;
         private DungeonRankAdapter m_DungeonRankAdapter;
@@ -25,8 +26,8 @@
         private HouseAdapter m_HouseAdapter;
         private HuskyAdapter m_HuskyAdapter;
         private ItemIdPoolAdapter m_ItemIdPool;
-        private LoginIdPoolAdapter m_LoginIdPool;
         private LogInOutReportAdapter m_LogInOutReportAdapter;
+        private LoginIdPoolAdapter m_LoginIdPool;
         private MailBoxAdapter m_MailBoxAdapter;
         private MemoAdapter m_MemoAdapter;
         private PetAdapter m_PetAdapter;
@@ -49,6 +50,7 @@
                 m_QueryManager.m_AccountActivationAdapter = new AccountActivationFileAdapter();
                 m_QueryManager.m_AccountRefAdapter = new AccountrefFileAdapter();
                 m_QueryManager.m_CharacterAdapter = new CharacterFileAdapter();
+
                 m_QueryManager.m_PetAdapter = new PetFileAdapter();
                 m_QueryManager.m_BankAdapter = new BankFileAdapter();
                 m_QueryManager.m_MemoAdapter = new MemoFileAdapter();
@@ -84,6 +86,7 @@
                 m_QueryManager.m_AccountActivationAdapter.Initialize("");
                 m_QueryManager.m_AccountRefAdapter.Initialize("");
                 m_QueryManager.m_CharacterAdapter.Initialize("");
+
                 m_QueryManager.m_PetAdapter.Initialize("");
                 m_QueryManager.m_BankAdapter.Initialize("");
                 m_QueryManager.m_MemoAdapter.Initialize("");
@@ -114,6 +117,421 @@
                 m_QueryManager.m_CountryReportAdapter.Initialize("");
                 m_QueryManager.m_LogInOutReportAdapter.Initialize("");
                 m_QueryManager.m_HuskyAdapter.Initialize("");
+
+            }
+            if (ConfigManager.hybridMode)
+            {
+                string connectionString = ConfigManager.GetConnectionString("account");
+                if ((connectionString != null) && (connectionString != string.Empty))
+                {
+                    m_QueryManager.m_AccountAdapter = new AccountSqlAdapter();
+                    m_QueryManager.m_AccountAdapter.Initialize(connectionString);
+                    m_QueryManager.m_AccountActivationAdapter = new AccountActivationSqlAdapter();
+                    m_QueryManager.m_AccountActivationAdapter.Initialize(connectionString);
+                    Console.WriteLine("account : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_AccountAdapter = new AccountFileAdapter();
+                    m_QueryManager.m_AccountActivationAdapter = new AccountActivationFileAdapter();
+                    m_QueryManager.m_AccountAdapter.Initialize("");
+                    m_QueryManager.m_AccountActivationAdapter.Initialize("");
+                }
+                string str2 = ConfigManager.GetConnectionString("accountref");
+                if ((str2 != null) && (str2 != string.Empty))
+                {
+                    m_QueryManager.m_AccountRefAdapter = new AccountrefSqlAdapter();
+                    m_QueryManager.m_AccountRefAdapter.Initialize(str2);
+                    Console.WriteLine("accountref : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_AccountRefAdapter = new AccountrefFileAdapter();
+                    m_QueryManager.m_AccountRefAdapter.Initialize("");
+                }
+                string str3 = ConfigManager.GetConnectionString("character");
+                if ((str3 != null) && (str3 != string.Empty))
+                {
+                    m_QueryManager.m_CharacterAdapter = new CharacterSqlAdapter();
+                    m_QueryManager.m_CharacterAdapter.Initialize(str3);
+                    m_QueryManager.m_PetAdapter = new PetSqlAdapter();
+                    m_QueryManager.m_PetAdapter.Initialize(str3);
+                    Console.WriteLine("character : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_CharacterAdapter = new CharacterFileAdapter();
+
+                    m_QueryManager.m_PetAdapter = new PetFileAdapter();
+                    m_QueryManager.m_CharacterAdapter.Initialize("");
+
+                    m_QueryManager.m_PetAdapter.Initialize("");
+                }
+                string str4 = ConfigManager.GetConnectionString("bank");
+                if ((str4 != null) && (str4 != string.Empty))
+                {
+                    m_QueryManager.m_BankAdapter = new BankSqlAdapter();
+                    m_QueryManager.m_BankAdapter.Initialize(str4);
+                    Console.WriteLine("bank : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_BankAdapter = new BankFileAdapter();
+                    m_QueryManager.m_BankAdapter.Initialize("");
+                }
+                string str5 = ConfigManager.GetConnectionString("guild");
+                if ((str5 != null) && (str5 != string.Empty))
+                {
+                    m_QueryManager.m_GuildAdapter = new GuildSqlAdapter();
+                    m_QueryManager.m_GuildAdapter.Initialize(str5);
+                    Console.WriteLine("guild : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_GuildAdapter = new GuildFileAdapter();
+                    m_QueryManager.m_GuildAdapter.Initialize("");
+                }
+                string str6 = ConfigManager.GetConnectionString("castle");
+                if ((str6 != null) && (str6 != string.Empty))
+                {
+                    m_QueryManager.m_CastleAdapter = new CastleSqlAdapter();
+                    m_QueryManager.m_CastleAdapter.Initialize(str6);
+                    Console.WriteLine("castle : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_CastleAdapter = new CastleFileAdapter();
+                    m_QueryManager.m_CastleAdapter.Initialize("");
+                }
+                string str7 = ConfigManager.GetConnectionString("house");
+                if ((str7 != null) && (str7 != string.Empty))
+                {
+                    string str8 = ConfigManager.GetConnectionString("houseguestbook");
+                    if ((str8 != null) && (str8 != string.Empty))
+                    {
+                        Console.WriteLine("House GuestBook's DISABLED");
+                    }
+                    m_QueryManager.m_HouseAdapter = new HouseSqlAdapter(str8);
+                    m_QueryManager.m_HouseAdapter.Initialize(str7);
+                    Console.WriteLine("house : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_HouseAdapter = new HouseFileAdapter();
+                    m_QueryManager.m_HouseAdapter.Initialize("");
+                }
+                string str9 = ConfigManager.GetConnectionString("prop");
+                if ((str9 != null) && (str9 != string.Empty))
+                {
+                    m_QueryManager.m_PropAdapter = new PropSqlAdapter();
+                    m_QueryManager.m_PropAdapter.Initialize(str9);
+                    Console.WriteLine("prop : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_PropAdapter = new PropFileAdapter();
+                    m_QueryManager.m_PropAdapter.Initialize("");
+                }
+                string str10 = ConfigManager.GetConnectionString("websynch");
+                if ((str10 != null) && (str10 != string.Empty))
+                {
+                    m_QueryManager.m_WebSynchAdapter = new WebSynchSqlAdapter();
+                    m_QueryManager.m_WebSynchAdapter.Initialize(str10);
+                    Console.WriteLine("websynch : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_WebSynchAdapter = null;
+                    Console.WriteLine("WebSynch : No file adapter exists. This is normal, just a reminder");
+                }
+                string str11 = ConfigManager.GetConnectionString("channelingkeypool");
+                if ((str11 != null) && (str11 != string.Empty))
+                {
+                    m_QueryManager.m_ChannelingKeyPool = new ChannelingKeyPoolSqlAdapter();
+                    m_QueryManager.m_ChannelingKeyPool.Initialize(str11);
+                    Console.WriteLine("channelingKeypool : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_ChannelingKeyPool = new ChannelingKeyPoolFileAdapter();
+                    m_QueryManager.m_ChannelingKeyPool.Initialize("");
+                }
+                string str12 = ConfigManager.GetConnectionString("charidpool");
+                if ((str12 != null) && (str12 != string.Empty))
+                {
+                    m_QueryManager.m_CharacterIdPool = new CharIdPoolSqlAdapter();
+                    m_QueryManager.m_CharacterIdPool.Initialize(str12);
+                    Console.WriteLine("charIdpool : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_CharacterIdPool = new CharIdPoolFileAdapter();
+                    m_QueryManager.m_CharacterIdPool.Initialize("");
+                }
+                string str13 = ConfigManager.GetConnectionString("itemidpool");
+                if ((str13 != null) && (str13 != string.Empty))
+                {
+                    m_QueryManager.m_ItemIdPool = new ItemIdPoolSqlAdapter();
+                    m_QueryManager.m_ItemIdPool.Initialize(str13);
+                    Console.WriteLine("itemIdpool : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_ItemIdPool = new ItemIdPoolFileAdapter();
+                    m_QueryManager.m_ItemIdPool.Initialize("");
+                }
+                string str14 = ConfigManager.GetConnectionString("propidpool");
+                if ((str14 != null) && (str14 != string.Empty))
+                {
+                    m_QueryManager.m_PropIdPool = new PropIdPoolSqlAdapter();
+                    m_QueryManager.m_PropIdPool.Initialize(str14);
+                    Console.WriteLine("propIdpool : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_PropIdPool = new PropIdPoolFileAdapter();
+                    m_QueryManager.m_PropIdPool.Initialize("");
+                }
+                string str15 = ConfigManager.GetConnectionString("guildidpool");
+                if ((str15 != null) && (str15 != string.Empty))
+                {
+                    m_QueryManager.m_GuildIdPool = new GuildIdPoolSqlAdapter();
+                    m_QueryManager.m_GuildIdPool.Initialize(str15);
+                    Console.WriteLine("guildId : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_GuildIdPool = new GuildIdPoolFileAdapter();
+                    m_QueryManager.m_GuildIdPool.Initialize("");
+                }
+                string str16 = ConfigManager.GetConnectionString("loginidpool");
+                if ((str16 != null) && (str16 != string.Empty))
+                {
+                    m_QueryManager.m_LoginIdPool = new LoginIdPoolSqlAdapter();
+                    m_QueryManager.m_LoginIdPool.Initialize(str16);
+                    Console.WriteLine("loginId : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_LoginIdPool = new LoginIdPoolFileAdapter();
+                    m_QueryManager.m_LoginIdPool.Initialize("");
+                }
+                string str17 = ConfigManager.GetConnectionString("bididpool");
+                if ((str17 != null) && (str17 != string.Empty))
+                {
+                    m_QueryManager.m_BidIdPool = new BidIdPoolSqlAdapter();
+                    m_QueryManager.m_BidIdPool.Initialize(str17);
+                    Console.WriteLine("bidIdpool : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_BidIdPool = new BidIdPoolFileAdapter();
+                    m_QueryManager.m_BidIdPool.Initialize("");
+                }
+                string str18 = ConfigManager.GetConnectionString("memo");
+                if ((str18 != null) && (str18 != string.Empty))
+                {
+                    m_QueryManager.m_MemoAdapter = new MemoSqlAdapter();
+                    m_QueryManager.m_MemoAdapter.Initialize(str18);
+                    Console.WriteLine("memo : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_MemoAdapter = new MemoFileAdapter();
+                    m_QueryManager.m_MemoAdapter.Initialize("");
+                }
+                string str19 = ConfigManager.GetConnectionString("chronicle");
+                if ((str19 != null) && (str19 != string.Empty))
+                {
+                    m_QueryManager.m_ChronicleAdapter = new ChronicleSqlAdapter();
+                    m_QueryManager.m_ChronicleAdapter.Initialize(str19);
+                    Console.WriteLine("chronicle : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_ChronicleAdapter = new ChronicleFileAdapter();
+                    m_QueryManager.m_ChronicleAdapter.Initialize("");
+                }
+                string str20 = ConfigManager.GetConnectionString("ruin");
+                if ((str20 != null) && (str20 != string.Empty))
+                {
+                    m_QueryManager.m_RuinAdapter = new RuinSqlAdapter();
+                    m_QueryManager.m_RuinAdapter.Initialize(str20);
+                    Console.WriteLine("ruin : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_RuinAdapter = new RuinFileAdapter();
+                    m_QueryManager.m_RuinAdapter.Initialize("");
+                }
+                string str21 = ConfigManager.GetConnectionString("shopadvertise");
+                if ((str21 != null) && (str21 != string.Empty))
+                {
+                    m_QueryManager.m_ShopAdvertiseAdapter = new ShopAdvertiseSqlAdapter();
+                    m_QueryManager.m_ShopAdvertiseAdapter.Initialize(str21);
+                    Console.WriteLine("shopAdvertise : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_ShopAdvertiseAdapter = new ShopAdvertiseFileAdapter();
+                    m_QueryManager.m_ShopAdvertiseAdapter.Initialize("");
+                }
+                string str22 = ConfigManager.GetConnectionString("dungeonrank");
+                if ((str22 != null) && (str22 != string.Empty))
+                {
+                    m_QueryManager.m_DungeonRankAdapter = new DungeonRankSqlAdapter();
+                    m_QueryManager.m_DungeonRankAdapter.Initialize(str22);
+                    Console.WriteLine("dungeonRank : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_DungeonRankAdapter = new DungeonRankFileAdapter();
+                    m_QueryManager.m_DungeonRankAdapter.Initialize("");
+                }
+                string str23 = ConfigManager.GetConnectionString("promotionrank");
+                if ((str23 != null) && (str23 != string.Empty))
+                {
+                    m_QueryManager.m_PromotionAdapter = new PromotionSqlAdapter();
+                    m_QueryManager.m_PromotionAdapter.Initialize(str23);
+                    Console.WriteLine("promotionRank : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_PromotionAdapter = new PromotionFileAdapter();
+                    m_QueryManager.m_PromotionAdapter.Initialize("");
+                }
+                string str24 = ConfigManager.GetConnectionString("mailbox");
+                if ((str24 != null) && (str24 != string.Empty))
+                {
+                    m_QueryManager.m_MailBoxAdapter = new MailBoxSqlAdapter();
+                    m_QueryManager.m_MailBoxAdapter.Initialize(str24);
+                    Console.WriteLine("mailbox : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_MailBoxAdapter = new MailBoxFileAdapter();
+                    m_QueryManager.m_MailBoxAdapter.Initialize("");
+                }
+                string str25 = ConfigManager.GetConnectionString("farm");
+                if ((str25 != null) && (str25 != string.Empty))
+                {
+                    m_QueryManager.m_FarmAdapter = new FarmSqlAdapter();
+                    m_QueryManager.m_FarmAdapter.Initialize(str25);
+                    Console.WriteLine("Farm : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_FarmAdapter = new FarmFileAdapter();
+                    m_QueryManager.m_FarmAdapter.Initialize("");
+                }
+                string str26 = ConfigManager.GetConnectionString("bid");
+                if ((str26 != null) && (str26 != string.Empty))
+                {
+                    m_QueryManager.m_BidAdapter = new BidSqlAdapter();
+                    m_QueryManager.m_BidAdapter.Initialize(str26);
+                    Console.WriteLine("bid : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_BidAdapter = new BidFileAdapter();
+                    m_QueryManager.m_BidAdapter.Initialize("");
+                }
+                string str27 = ConfigManager.GetConnectionString("event");
+                if ((str27 != null) && (str27 != string.Empty))
+                {
+                    m_QueryManager.m_EventAdapter = new EventSqlAdapter();
+                    m_QueryManager.m_EventAdapter.Initialize(str27);
+                    Console.WriteLine("event : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_EventAdapter = new EventFileAdapter();
+                    m_QueryManager.m_EventAdapter.Initialize("");
+                }
+                string str28 = ConfigManager.GetConnectionString("worldmeta");
+                if ((str28 != null) && (str28 != string.Empty))
+                {
+                    m_QueryManager.m_WorldMetaAdapter = new WorldMetaSqlAdapter();
+                    m_QueryManager.m_WorldMetaAdapter.Initialize(str28);
+                    Console.WriteLine("worldMeta : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_WorldMetaAdapter = new WorldMetaFileAdapter();
+                    m_QueryManager.m_WorldMetaAdapter.Initialize("");
+                }
+                string str29 = ConfigManager.GetConnectionString("wine");
+                if ((str29 != null) && (str29 != string.Empty))
+                {
+                    m_QueryManager.m_WineAdapter = new WineSqlAdapter();
+                    m_QueryManager.m_WineAdapter.Initialize(str29);
+                    Console.WriteLine("wine : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_WineAdapter = new WineFileAdapter();
+                    m_QueryManager.m_WineAdapter.Initialize("");
+                }
+                string str30 = ConfigManager.GetConnectionString("wine");
+                if ((str30 != null) && (str30 != string.Empty))
+                {
+                    m_QueryManager.m_RoyalAlchemistAdapter = new RoyalAlchemistSqlAdapter();
+                    m_QueryManager.m_RoyalAlchemistAdapter.Initialize(str30);
+                    Console.WriteLine("Royal Alchemist : Using SQL Adapter - linked to wine");
+                }
+                else
+                {
+                    m_QueryManager.m_RoyalAlchemistAdapter = new RoyalAlchemistFileAdapter();
+                    m_QueryManager.m_RoyalAlchemistAdapter.Initialize("");
+                }
+                string str31 = ConfigManager.GetConnectionString("wine");
+                if ((str31 != null) && (str31 != string.Empty))
+                {
+                    m_QueryManager.m_FamilyAdapter = new FamilySqlAdapter();
+                    m_QueryManager.m_FamilyAdapter.Initialize(str31);
+                    Console.WriteLine("family : Using SQL Adapter - linked to wine");
+                }
+                else
+                {
+                    m_QueryManager.m_FamilyAdapter = new FamilyFileAdapter();
+                    m_QueryManager.m_FamilyAdapter.Initialize("");
+                }
+                string str32 = ConfigManager.GetConnectionString("countryreport");
+                if ((str32 != null) && (str32 != string.Empty))
+                {
+                    m_QueryManager.m_CountryReportAdapter = new CountryReportSqlAdapter();
+                    m_QueryManager.m_CountryReportAdapter.Initialize(str32);
+                    Console.WriteLine("Country report : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_CountryReportAdapter = new CountryReportFileAdapter();
+                    m_QueryManager.m_CountryReportAdapter.Initialize("");
+                }
+                string str33 = ConfigManager.GetConnectionString("loginoutreport");
+                if ((str33 != null) && (str33 != string.Empty))
+                {
+                    m_QueryManager.m_LogInOutReportAdapter = new LogInOutReportSqlAdapter();
+                    m_QueryManager.m_LogInOutReportAdapter.Initialize(str33);
+                    Console.WriteLine("LogInOutReport : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_LogInOutReportAdapter = new LogInOutReportFileAdapter();
+                    m_QueryManager.m_LogInOutReportAdapter.Initialize("");
+                }
+                string str34 = ConfigManager.GetConnectionString("husky");
+                if ((str34 != null) && (str34 != string.Empty))
+                {
+                    m_QueryManager.m_HuskyAdapter = new HuskySqlAdapter();
+                    m_QueryManager.m_HuskyAdapter.Initialize(str34);
+                    Console.WriteLine("Husky : Using SQL Adapter");
+                }
+                else
+                {
+                    m_QueryManager.m_HuskyAdapter = new HuskyFileAdapter();
+                    m_QueryManager.m_HuskyAdapter.Initialize("");
+                }
             }
             else
             {
@@ -196,7 +614,7 @@
                 }
                 else
                 {
-                    m_QueryManager.m_HouseAdapter = null;
+                    m_QueryManager.m_HouseAdapter = new HouseFileAdapter();
                 }
                 string str9 = ConfigManager.GetConnectionString("prop");
                 if (str9 != string.Empty)
@@ -650,6 +1068,8 @@
             }
         }
 
+
+
         public static ChronicleAdapter Chronicle
         {
             get
@@ -738,19 +1158,19 @@
             }
         }
 
-        public static LoginIdPoolAdapter LoginIdPool
-        {
-            get
-            {
-                return m_QueryManager.m_LoginIdPool;
-            }
-        }
-
         public static LogInOutReportAdapter LogInOutReport
         {
             get
             {
                 return m_QueryManager.m_LogInOutReportAdapter;
+            }
+        }
+
+        public static LoginIdPoolAdapter LoginIdPool
+        {
+            get
+            {
+                return m_QueryManager.m_LoginIdPool;
             }
         }
 
