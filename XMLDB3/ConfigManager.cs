@@ -468,7 +468,7 @@
         {
             get
             {
-                return (((config != null) && (config.feature != null)) && config.feature.pvp);
+                return (((config != null) && (config.feature != null)) && config.feature.hybridMode);
             }
         }
 
@@ -477,7 +477,7 @@
         {
             get
             {
-                return (((config != null) && (config.feature != null)) && config.feature.pvp);
+                return (((config != null) && (config.feature != null)) && config.feature.characterFileAdapterFix);
             }
         }
 
