@@ -463,6 +463,24 @@
                 return (((config != null) && (config.feature != null)) && config.feature.pvp);
             }
         }
+        //Add Hybrid mode bool so we can evaluate if we are running in Hybrid mode or not
+        public static bool hybridMode
+        {
+            get
+            {
+                return (((config != null) && (config.feature != null)) && config.feature.pvp);
+            }
+        }
+
+        //Add Hybrid mode bool so we can evaluate if we are enabling the alternative use of the character file adapter
+        public static bool characterFileAdapterFix
+        {
+            get
+            {
+                return (((config != null) && (config.feature != null)) && config.feature.pvp);
+            }
+        }
+
 
         public static bool IsRedirectionEnabled
         {
