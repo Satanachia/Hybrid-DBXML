@@ -185,7 +185,7 @@
                 bool flag;
                 WorkSession.WriteStatus("CharacterFileAdapter.IsUsableName() : 함수에 진입하였습니다");
                 //Can't seem to figure out a dynamic way from reading from config without using the base sql interface
-                SqlConnection connection = new SqlConnection("data source=127.0.0.1;initial catalog=mabinogi;integrated security=False;User ID=mabi_admin;Password=eM6LhjFW6BnT!h0!vo2s");
+                SqlConnection connection = new SqlConnection();
                 if (_account.Length > 0)
                 {
                     command = new SqlCommand("dbo.CheckGameReservedName", connection)

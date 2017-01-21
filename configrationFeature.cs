@@ -12,5 +12,7 @@ public class configrationFeature
     // Similar idea here. Ability to toggle the character adapter workaround when running acocuntref in SQL mode but not character. 
     [XmlAttribute]
     public bool characterFileAdapterFix;
+    [XmlAttribute]
+    public string nameCheckConnection;
 }
 

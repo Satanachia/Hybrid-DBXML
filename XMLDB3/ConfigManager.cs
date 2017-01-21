@@ -481,6 +481,18 @@
             }
         }
 
+        public static string nameCheckConnection
+        {
+            get
+            {
+                if ((config != null) && (config.feature != null))
+                {
+                    return config.feature.nameCheckConnection;
+                }
+                else
+                return null; 
+            }
+        }
 
         public static bool IsRedirectionEnabled
         {
