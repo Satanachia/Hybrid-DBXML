@@ -12,29 +12,28 @@
             if (ConfigManager.characterFileAdapterFix)
             {
                 bool flag;
-                WorkSession.WriteStatus("PetSqlAdapter.Create() : 함수에 진입하였습니다");
+               // WorkSession.WriteStatus("PetSqlAdapter.Create() : 함수에 진입하였습니다");
                 SqlConnection connection2 = new SqlConnection(((SqlAdapter)_accountref).ConnectionString);
                 SqlTransaction transaction2 = null;
                 try
                 {
-                    WorkSession.WriteStatus("PetSqlAdapter.Create() : 데이터베이스와 연결합니다");
+                  //  WorkSession.WriteStatus("PetSqlAdapter.Create() : 데이터베이스와 연결합니다");
                     connection2.Open();
                     SqlCommand command = new SqlCommand("dbo.CheckUsableName", connection2);
                     command.CommandType = System.Data.CommandType.StoredProcedure;
                     command.Parameters.Add("@name", SqlDbType.VarChar, 0x40).Value = _pet.name;
-                    WorkSession.WriteStatus("PetSqlAdapter.CreateEx() : 펫 이름 중복 검사를 실행합니다");
+                 //   WorkSession.WriteStatus("PetSqlAdapter.CreateEx() : 펫 이름 중복 검사를 실행합니다");
                     if (((int)command.ExecuteScalar()) == 0)
                     {
                         ExceptionMonitor.ExceptionRaised(new Exception("펫 이름이 중복됩니다."), _account, _pet.name);
                         return false;
                     }
-                    connection2.Open();
                     transaction2 = connection2.BeginTransaction("PET_CREATE_APP");
-                    WorkSession.WriteStatus("PetSqlAdapter.Create() : 계정-펫 링크 생성 명령을 실행합니다");
+                 //   WorkSession.WriteStatus("PetSqlAdapter.Create() : 계정-펫 링크 생성 명령을 실행합니다");
                     SqlCommand command3 = new SqlCommand(string.Concat(new object[] { "exec dbo.AddAccountrefPet @strAccount=", UpdateUtility.BuildString(_account), ",@idPet=", _pet.id, ",@name=", UpdateUtility.BuildString(_pet.name), ",@server=", UpdateUtility.BuildString(_server), ",@remaintime=", _pet.summon.remaintime, ",@lasttime=", _pet.summon.lasttime, ",@expiretime=", _pet.summon.expiretime, "\n" }), connection2);
                     command3.Transaction = transaction2;
-
-                    WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 커밋합니다");
+                    command3.ExecuteNonQuery();
+                   // WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 커밋합니다");
                     transaction2.Commit();
                     
                     if (!base.IsExistData(_pet.id))
@@ -53,8 +52,8 @@
                         transaction2.Rollback("PET_CREATE_APP");
                     }
                     ExceptionMonitor.ExceptionRaised(exception);
-                    WorkSession.WriteStatus(exception.Message, exception.Number);
-                    WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 롤백합니다");
+                //    WorkSession.WriteStatus(exception.Message, exception.Number);
+                //    WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 롤백합니다");
                     flag = false;
                 }
                 catch (Exception exception2)
@@ -65,14 +64,14 @@
                         transaction2.Rollback("PET_CREATE_APP");
                     }
 
-                    WorkSession.WriteStatus(exception2.Message);
+                //    WorkSession.WriteStatus(exception2.Message);
                     ExceptionMonitor.ExceptionRaised(exception2);
-                    WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 롤백합니다");
+                //    WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 롤백합니다");
                     flag = false;
                 }
                 finally
                 {
-                    WorkSession.WriteStatus("PetSqlAdapter.Create() : 연결을 종료합니다");
+                  //  WorkSession.WriteStatus("PetSqlAdapter.Create() : 연결을 종료합니다");
 
                     if (connection2.State == ConnectionState.Open)
                     {
