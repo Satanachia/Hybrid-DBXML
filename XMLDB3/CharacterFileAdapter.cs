@@ -7,6 +7,7 @@
 
     public class CharacterFileAdapter : FileAdapter, CharacterAdapter
     {
+       
         private bool Create(CharacterInfo _character)
         {
             if (!base.IsExistData(_character.id))
@@ -39,7 +40,6 @@
                         CommandType = System.Data.CommandType.StoredProcedure
                     };
                     command.Parameters.Add("@name", SqlDbType.VarChar, 0x40).Value = _character.name;
-                    command.Parameters.Add("@servername", SqlDbType.VarChar, 0x40).Value = _server;
                   //  WorkSession.WriteStatus("CharacterSqlAdapter.CreateEx() : 캐릭터 이름 중복 검사를 실행합니다");
                     if (((int)command.ExecuteScalar()) == 0)
                     {
@@ -176,10 +176,67 @@
             base.Initialize(typeof(CharacterInfo), ConfigManager.GetFileDBPath("character"), ".xml");
         }
 
+        //Start name check mess
         public bool IsUsableName(string _name, string _account)
         {
-            return true;
+            if (ConfigManager.characterFileAdapterFix)
+            {
+                SqlCommand command;
+                bool flag;
+                WorkSession.WriteStatus("CharacterFileAdapter.IsUsableName() : 함수에 진입하였습니다");
+                //Can't seem to figure out a dynamic way from reading from config without using the base sql interface
+                SqlConnection connection = new SqlConnection("data source=127.0.0.1;initial catalog=mabinogi;integrated security=False;User ID=mabi_admin;Password=eM6LhjFW6BnT!h0!vo2s");
+                if (_account.Length > 0)
+                {
+                    command = new SqlCommand("dbo.CheckGameReservedName", connection)
+                    {
+                        CommandType = System.Data.CommandType.StoredProcedure
+                    };
+                    SqlParameter parameter = command.Parameters.Add("@account", SqlDbType.VarChar, 0x40);
+                    SqlParameter parameter2 = command.Parameters.Add("@characterName", SqlDbType.VarChar, 0x40);
+                    parameter.Value = _account;
+                    parameter2.Value = _name;
+                }
+                else
+                {
+                    command = new SqlCommand("dbo.CheckUsableName", connection)
+                    {
+                        CommandType = System.Data.CommandType.StoredProcedure
+                    };
+                    command.Parameters.Add("@name", SqlDbType.VarChar, 0x40).Value = _name;
+                }
+                try
+                {
+                    WorkSession.WriteStatus("CharacterFileAdapter.IsUsableName() : 데이터베이스와 연결합니다");
+                    connection.Open();
+                    flag = ((int)command.ExecuteScalar()) != 0;
+                }
+                catch (SqlException exception)
+                {
+                    ExceptionMonitor.ExceptionRaised(exception, _name);
+                    WorkSession.WriteStatus(exception.Message, _name);
+                    flag = false;
+                }
+                catch (Exception exception2)
+                {
+                    ExceptionMonitor.ExceptionRaised(exception2, _name);
+                    WorkSession.WriteStatus(exception2.Message, _name);
+                    flag = false;
+                }
+                finally
+                {
+                    WorkSession.WriteStatus("CharacterFileAdapter.IsUsableName() : 연결을 종료합니다");
+                    connection.Close();
+                }
+                return flag;
+            }
+            else
+            //orig test mode code
+            {
+                return true;
+            }
         }
+
 
         public CharacterInfo Read(long _id, CharacterInfo _cache)
         {
