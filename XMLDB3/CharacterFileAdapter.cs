@@ -185,7 +185,7 @@
                 bool flag;
                 WorkSession.WriteStatus("CharacterFileAdapter.IsUsableName() : 함수에 진입하였습니다");
                 //Can't seem to figure out a dynamic way from reading from config without using the base sql interface
-                SqlConnection connection = new SqlConnection();
+                SqlConnection connection = new SqlConnection(ConfigManager.nameCheckConnection);
                 if (_account.Length > 0)
                 {
                     command = new SqlCommand("dbo.CheckGameReservedName", connection)
