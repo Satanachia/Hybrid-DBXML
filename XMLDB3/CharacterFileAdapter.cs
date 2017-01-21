@@ -1,6 +1,8 @@
 ﻿namespace XMLDB3
 {
     using System;
+    using System.Data;
+    using System.Data.SqlClient;
     using System.Runtime.InteropServices;
 
     public class CharacterFileAdapter : FileAdapter, CharacterAdapter
@@ -15,17 +17,100 @@
             return false;
         }
 
+        //Start modifications of CharacterFile adapter
         public bool CreateEx(string _account, byte _supportRewardState, string _server, byte _race, bool _supportCharacter, CharacterInfo _character, AccountRefAdapter _accountref, BankAdapter _bank, WebSynchAdapter _websynch)
         {
-            if (this.Create(_character))
+            //Check to see if we are using the fix. If we are account_character_ref is instead changed to use the SQL adapter code instead of the file adapter code.
+            if (ConfigManager.characterFileAdapterFix)
             {
-                AccountrefFileAdapter adapter = _accountref as AccountrefFileAdapter;
-                adapter.AddCharacterSlot(_account, _supportRewardState, _character.id, _character.name, _server, _race, _supportCharacter);
-                adapter.SetSupportRewardState(_account, _supportRewardState);
-                ((BankFileAdapter) _bank).AddSlot(_account, _character.name, (BankRace) _race);
-                return true;
+                bool flag;
+               // WorkSession.WriteStatus("CharacterSqlAdapter.CreateEx() : 함수에 진입하였습니다");
+               //Work sessions commented out for debugging on my end. Makes the code long to traverse. 
+                SqlConnection connection2 = new SqlConnection(((SqlAdapter)_accountref).ConnectionString);
+                SqlTransaction transaction2 = null;
+                try
+                {
+                 //   WorkSession.WriteStatus("CharacterSqlAdapter.CreateEx() : 데이터베이스와 연결합니다");
+                    connection2.Open();
+                    //Run the duplicate name check stored procedure. If a chaarcter with the same name and server exist already in account_character_ref throw error
+                    //This errror is ugly to the users. Be aware. 
+                    SqlCommand command = new SqlCommand("dbo.CheckUsableName", connection2)
+                    {
+                        CommandType = System.Data.CommandType.StoredProcedure
+                    };
+                    command.Parameters.Add("@name", SqlDbType.VarChar, 0x40).Value = _character.name;
+                    command.Parameters.Add("@servername", SqlDbType.VarChar, 0x40).Value = _server;
+                  //  WorkSession.WriteStatus("CharacterSqlAdapter.CreateEx() : 캐릭터 이름 중복 검사를 실행합니다");
+                    if (((int)command.ExecuteScalar()) == 0)
+                    {
+                        ExceptionMonitor.ExceptionRaised(new Exception("캐릭터 이름이 중복됩니다."), _account, _character.name);
+                        return false;
+                    }
+                 
+                    transaction2 = connection2.BeginTransaction("CHARACTER_CREATE_EX_APP");
+
+                   // WorkSession.WriteStatus("CharacterSqlAdapter.CreateEx() : 뱅크 생성 명령을 실행합니다");
+                    
+                    object obj2 = string.Concat(new object[] { "exec dbo.AddAccountrefCharacter  @strAccount=", UpdateUtility.BuildString(_account), ",@idCharacter=", _character.id, ",@name=", UpdateUtility.BuildString(_character.name), ",@server=", UpdateUtility.BuildString(_server), ",@race=", _race, ",@supportCharacter=", _supportCharacter ? 1 : 0, "\n" });
+                    new SqlCommand(string.Concat(new object[] { obj2, "exec dbo.WriteAccountSupportRewardState  @strAccount=", UpdateUtility.BuildString(_account), ",@supportRewardState=", _supportRewardState, "\n" }), connection2) { Transaction = transaction2 }.ExecuteNonQuery();
+                   // WorkSession.WriteStatus("CharacterSqlAdapter.CreateEx() : 웹싱크 명령을 실행합니다");
+
+                    transaction2.Commit();
+                    //Might want to add error checking here....but yolo
+                    if (this.Create(_character))
+                    {
+                        ((BankFileAdapter)_bank).AddSlot(_account, _character.name, (BankRace)_race);
+                        return true;
+                    }
+                    flag = true;
+                }
+                catch (SqlException exception)
+                {
+                    if (transaction2 != null)
+                    {
+                        transaction2.Rollback("CHARACTER_CREATE_EX_APP");
+                    }
+                    ExceptionMonitor.ExceptionRaised(exception, _account);
+                    WorkSession.WriteStatus(exception.Message, exception.Number);
+                    WorkSession.WriteStatus("CharacterSqlAdapter.CreateEx() : 트랜잭션을 롤백합니다");
+                    flag = false;
+                }
+                catch (Exception exception2)
+                {
+                    if (transaction2 != null)
+                    {
+                        transaction2.Rollback("CHARACTER_CREATE_EX_APP");
+                    }
+                    ExceptionMonitor.ExceptionRaised(exception2, _account);
+                    WorkSession.WriteStatus(exception2.Message, _account);
+                    WorkSession.WriteStatus("CharacterSqlAdapter.CreateEx() : 트랜잭션을 롤백합니다");
+                    flag = false;
+                }
+                finally
+                {
+                    WorkSession.WriteStatus("CharacterSqlAdapter.CreateEx() : 연결을 종료합니다");
+                    if (connection2.State == ConnectionState.Open)
+                    {
+                        connection2.Close();
+                    }
+                }
+                return flag;
+
             }
-            return false;
+            //Not using the fix? This is the original code using only file adapters. Preserved for test mode. 
+            else
+            
+            {
+                if (this.Create(_character))
+                {
+                    AccountrefFileAdapter adapter = _accountref as AccountrefFileAdapter;
+                    adapter.AddCharacterSlot(_account, _supportRewardState, _character.id, _character.name, _server, _race, _supportCharacter);
+                    adapter.SetSupportRewardState(_account, _supportRewardState);
+                    ((BankFileAdapter)_bank).AddSlot(_account, _character.name, (BankRace)_race);
+                    return true;
+                }
+                return false;
+            }
         }
 
         public bool Delete(long _id)
