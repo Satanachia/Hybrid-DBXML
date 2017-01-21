@@ -45,6 +45,8 @@
         public static void Initialize()
         {
             if (ConfigManager.IsTestMode)
+                //Test mode is true if NO SQL connection information is present. This means remove the <sql> element  and all children entirely from config. 
+                // In test mode only the file adapters are used. 
             {
                 m_QueryManager.m_AccountAdapter = new AccountFileAdapter();
                 m_QueryManager.m_AccountActivationAdapter = new AccountActivationFileAdapter();
@@ -119,8 +121,11 @@
                 m_QueryManager.m_HuskyAdapter.Initialize("");
 
             }
+            // Check to see if testmode = true in config. eg: <feature pvp="true" hybridMode="true"  />
             if (ConfigManager.hybridMode)
             {
+                //Start my mess of shit. 
+                //Basically, if a connection string exists in config use SQL adapter. Else use the file adapter. 
                 string connectionString = ConfigManager.GetConnectionString("account");
                 if ((connectionString != null) && (connectionString != string.Empty))
                 {
@@ -533,6 +538,7 @@
                     m_QueryManager.m_HuskyAdapter.Initialize("");
                 }
             }
+            //If we aren't running in hybrid mode but have SQL connections that exist we are running in true SQL mode. This is what we want to run in. 
             else
             {
                 string connectionString = ConfigManager.GetConnectionString("account");
