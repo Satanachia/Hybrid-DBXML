@@ -12,34 +12,34 @@
             if (ConfigManager.characterFileAdapterFix)
             {
                 bool flag;
-               // WorkSession.WriteStatus("PetSqlAdapter.Create() : 함수에 진입하였습니다");
+                // WorkSession.WriteStatus("PetSqlAdapter.Create() : 함수에 진입하였습니다");
                 SqlConnection connection2 = new SqlConnection(((SqlAdapter)_accountref).ConnectionString);
                 SqlTransaction transaction2 = null;
                 try
                 {
-                  //  WorkSession.WriteStatus("PetSqlAdapter.Create() : 데이터베이스와 연결합니다");
+                    //  WorkSession.WriteStatus("PetSqlAdapter.Create() : 데이터베이스와 연결합니다");
                     connection2.Open();
                     SqlCommand command = new SqlCommand("dbo.CheckUsableName", connection2);
                     command.CommandType = System.Data.CommandType.StoredProcedure;
                     command.Parameters.Add("@name", SqlDbType.VarChar, 0x40).Value = _pet.name;
-                 //   WorkSession.WriteStatus("PetSqlAdapter.CreateEx() : 펫 이름 중복 검사를 실행합니다");
+                    //   WorkSession.WriteStatus("PetSqlAdapter.CreateEx() : 펫 이름 중복 검사를 실행합니다");
                     if (((int)command.ExecuteScalar()) == 0)
                     {
                         ExceptionMonitor.ExceptionRaised(new Exception("펫 이름이 중복됩니다."), _account, _pet.name);
                         return false;
                     }
                     transaction2 = connection2.BeginTransaction("PET_CREATE_APP");
-                 //   WorkSession.WriteStatus("PetSqlAdapter.Create() : 계정-펫 링크 생성 명령을 실행합니다");
+                    //   WorkSession.WriteStatus("PetSqlAdapter.Create() : 계정-펫 링크 생성 명령을 실행합니다");
                     SqlCommand command3 = new SqlCommand(string.Concat(new object[] { "exec dbo.AddAccountrefPet @strAccount=", UpdateUtility.BuildString(_account), ",@idPet=", _pet.id, ",@name=", UpdateUtility.BuildString(_pet.name), ",@server=", UpdateUtility.BuildString(_server), ",@remaintime=", _pet.summon.remaintime, ",@lasttime=", _pet.summon.lasttime, ",@expiretime=", _pet.summon.expiretime, "\n" }), connection2);
                     command3.Transaction = transaction2;
                     command3.ExecuteNonQuery();
-                   // WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 커밋합니다");
+                    // WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 커밋합니다");
                     transaction2.Commit();
-                    
+
                     if (!base.IsExistData(_pet.id))
                     {
-                          base.WriteToDB(_pet, _pet.id);
-                         return true;
+                        base.WriteToDB(_pet, _pet.id);
+                        return true;
                     }
                     flag = true;
 
@@ -52,8 +52,8 @@
                         transaction2.Rollback("PET_CREATE_APP");
                     }
                     ExceptionMonitor.ExceptionRaised(exception);
-                //    WorkSession.WriteStatus(exception.Message, exception.Number);
-                //    WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 롤백합니다");
+                    //    WorkSession.WriteStatus(exception.Message, exception.Number);
+                    //    WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 롤백합니다");
                     flag = false;
                 }
                 catch (Exception exception2)
@@ -64,14 +64,14 @@
                         transaction2.Rollback("PET_CREATE_APP");
                     }
 
-                //    WorkSession.WriteStatus(exception2.Message);
+                    //    WorkSession.WriteStatus(exception2.Message);
                     ExceptionMonitor.ExceptionRaised(exception2);
-                //    WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 롤백합니다");
+                    //    WorkSession.WriteStatus("PetSqlAdapter.Create() : 트랜잭션을 롤백합니다");
                     flag = false;
                 }
                 finally
                 {
-                  //  WorkSession.WriteStatus("PetSqlAdapter.Create() : 연결을 종료합니다");
+                    //  WorkSession.WriteStatus("PetSqlAdapter.Create() : 연결을 종료합니다");
 
                     if (connection2.State == ConnectionState.Open)
                     {
@@ -87,13 +87,13 @@
 
 
             else
-            //We are in test mode - use original file adapter code. 
-            if (!base.IsExistData(_pet.id))
-            {
-                base.WriteToDB(_pet, _pet.id);
-                ((AccountrefFileAdapter) _accountref).AddPetSlot(_account, _pet.id, _pet.name, _server, _pet.summon.remaintime, _pet.summon.lasttime, _pet.summon.expiretime);
-                return true;
-            }
+                //We are in test mode - use original file adapter code. 
+                if (!base.IsExistData(_pet.id))
+                {
+                    base.WriteToDB(_pet, _pet.id);
+                    ((AccountrefFileAdapter)_accountref).AddPetSlot(_account, _pet.id, _pet.name, _server, _pet.summon.remaintime, _pet.summon.lasttime, _pet.summon.expiretime);
+                    return true;
+                }
             return false;
         }
 
@@ -104,7 +104,7 @@
 
         public bool DeleteEx(string _account, string _server, long _idpet, AccountRefAdapter _accountref, WebSynchAdapter _websynch)
         {
-            ((AccountrefFileAdapter) _accountref).RemovePetSlot(_account, _idpet, _server);
+            ((AccountrefFileAdapter)_accountref).RemovePetSlot(_account, _idpet, _server);
             return true;
         }
 
@@ -114,7 +114,7 @@
             {
                 return false;
             }
-            PetInfo info = (PetInfo) base.ReadFromDB(_id);
+            PetInfo info = (PetInfo)base.ReadFromDB(_id);
             if (info == null)
             {
                 return false;
@@ -134,8 +134,8 @@
         {
             if (base.IsExistData(_id))
             {
-                PetInfo info = (PetInfo) base.ReadFromDB(_id);
-                _counter = (info.data != null) ? info.data.writeCounter : ((byte) 0);
+                PetInfo info = (PetInfo)base.ReadFromDB(_id);
+                _counter = (info.data != null) ? info.data.writeCounter : ((byte)0);
                 return true;
             }
             _counter = 0;
@@ -227,7 +227,7 @@
                 }
                 if (base.IsExistData(_id))
                 {
-                    PetInfo info = (PetInfo) base.ReadFromDB(_id);
+                    PetInfo info = (PetInfo)base.ReadFromDB(_id);
                     info.summon.remaintime = pet.remaintime;
                     info.summon.lasttime = pet.lasttime;
                     return info;
@@ -248,29 +248,129 @@
 
         public bool Write(string _account, string _server, byte _channelgroupid, PetInfo _pet, PetInfo _cache, AccountRefAdapter _accountref)
         {
-            AccountrefPet pet = null;
-            Accountref accountref = _accountref.Read(_account);
-            if (accountref == null)
+               // If we are using character file adapter fix use my mess of shit. 
+            if (ConfigManager.characterFileAdapterFix)
             {
-                return false;
-            }
-            foreach (AccountrefPet pet2 in accountref.pet)
-            {
-                if ((pet2.id == _pet.id) && (pet2.server == _server))
+                AccountrefPet pet = null;
+                Accountref accountref = _accountref.Read(_account);
+                if (accountref == null)
                 {
-                    pet = pet2;
-                    break;
+                    return false;
                 }
+                foreach (AccountrefPet pet2 in accountref.pet)
+                {
+                    if ((pet2.id == _pet.id) && (pet2.server == _server))
+                    {
+                        pet = pet2;
+                        break;
+                    }
+                }
+                if (pet == null)
+                {
+                    return false;
+                }
+                pet.remaintime = _pet.summon.remaintime;
+                pet.lasttime = _pet.summon.lasttime;
+                pet.groupID = _channelgroupid;
+
+                bool flag;
+                WorkSession.WriteStatus("PetSqlAdapter.Write() : 함수에 진입하였습니다");
+                try
+                {
+                    WorkSession.WriteStatus("PetSqlAdapter.Write() : SQL 명령문을 생성합니다");
+                    string str = PetUpdateBuilder.Build(_pet, _cache) + InventoryUpdateBuilder.Build(_pet.id, _pet.inventory, _cache.inventory, false);
+                    SqlConnection connection2 = new SqlConnection(((SqlAdapter)_accountref).ConnectionString);
+                    SqlTransaction transaction2 = null;
+                    try
+                    {
+                        WorkSession.WriteStatus("PetSqlAdapter.Write() : Accountref 데이터베이스와 연결합니다");
+                        long timestamp = Stopwatch.GetTimestamp();
+                        connection2.Open();
+                        transaction2 = connection2.BeginTransaction("PET_UPDATE_APP");
+                        SqlCommand command = new SqlCommand(string.Concat(new object[] { "exec dbo.UpdatePetSummonTime  ", UpdateUtility.BuildString(_account), ",", UpdateUtility.BuildString(_server), ",", _pet.id, ",", _channelgroupid, ",", _pet.summon.remaintime, ",", _pet.summon.lasttime }), connection2);
+                        command.Transaction = transaction2;
+                        command.ExecuteNonQuery();
+                        WorkSession.WriteStatus("PetSqlAdapter.Write() : 트랜잭션을 커밋합니다");
+                        if (transaction2 != null)
+                        {
+                            transaction2.Commit();
+                        }
+                        CommandStatistics.RegisterCommandTime(CommandStatistics.CommandType.cctPetWrite, Stopwatch.GetElapsedMilliseconds(timestamp));
+                        flag = true;
+                    }
+                    catch (SqlException exception)
+                    {
+                        ExceptionMonitor.ExceptionRaised(exception, _pet, str);
+                        WorkSession.WriteStatus(exception.Message, exception.Number);
+                        if (transaction2 != null)
+                        {
+                            transaction2.Rollback("PET_UPDATE_APP");
+                        }
+                        flag = false;
+                    }
+                    catch (Exception exception2)
+                    {
+                        ExceptionMonitor.ExceptionRaised(exception2, _pet, str);
+                        WorkSession.WriteStatus(exception2.Message);
+                        if (transaction2 != null)
+                        {
+                            transaction2.Rollback("PET_UPDATE_APP");
+                        }
+                        flag = false;
+                    }
+                    finally
+                    {
+                        WorkSession.WriteStatus("PetSqlAdapter.Write() : 연결을 종료합니다");
+                        if (connection2.State == ConnectionState.Open)
+                        {
+                            connection2.Close();
+                        }
+                    }
+                }
+                catch (SqlException exception3)
+                {
+                    ExceptionMonitor.ExceptionRaised(exception3);
+                    WorkSession.WriteStatus(exception3.Message, _pet);
+                    flag = false;
+                }
+                catch (Exception exception4)
+                {
+                    ExceptionMonitor.ExceptionRaised(exception4);
+                    WorkSession.WriteStatus(exception4.Message, _pet);
+                    flag = false;
+                }
+                this.Write(_pet);
+                return flag;
             }
-            if (pet == null)
+
+
+            // original Test mode code
+            else
             {
-                return false;
+                AccountrefPet pet = null;
+                Accountref accountref = _accountref.Read(_account);
+                if (accountref == null)
+                {
+                    return false;
+                }
+                foreach (AccountrefPet pet2 in accountref.pet)
+                {
+                    if ((pet2.id == _pet.id) && (pet2.server == _server))
+                    {
+                        pet = pet2;
+                        break;
+                    }
+                }
+                if (pet == null)
+                {
+                    return false;
+                }
+                pet.remaintime = _pet.summon.remaintime;
+                pet.lasttime = _pet.summon.lasttime;
+                pet.groupID = _channelgroupid;
+                ((AccountrefFileAdapter)_accountref).WriteToDB(accountref, _account);
+                return this.Write(_pet);
             }
-            pet.remaintime = _pet.summon.remaintime;
-            pet.lasttime = _pet.summon.lasttime;
-            pet.groupID = _channelgroupid;
-            ((AccountrefFileAdapter) _accountref).WriteToDB(accountref, _account);
-            return this.Write(_pet);
         }
     }
 }
