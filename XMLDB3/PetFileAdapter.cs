@@ -209,31 +209,138 @@
 
         public PetInfo Read(string _account, string _server, long _id, PetInfo _cache, AccountRefAdapter _accountref)
         {
-            AccountrefPet pet = null;
-            Accountref accountref = _accountref.Read(_account);
-            if (accountref != null)
+               //Gotta use that pesky sql account ref adapter again. Should probably do more error checking but its w/e quick n dirty for temp fix. 
+            if (ConfigManager.characterFileAdapterFix)
             {
-                foreach (AccountrefPet pet2 in accountref.pet)
+
+
+              //  WorkSession.WriteStatus("PetSqlAdapter.Read() : 함수에 진입하였습니다");
+                try
                 {
-                    if ((pet2.id == _id) && (pet2.server == _server))
+                    if ((_account != null) && (_server != null))
                     {
-                        pet = pet2;
-                        break;
+                        SqlConnection connection = null;
+                        SqlDataReader reader = null;
+                      //  WorkSession.WriteStatus("PetSqlAdapter.Read() : 펫의 소환 시간을 확인합니다.");
+                        connection = new SqlConnection(((SqlAdapter)_accountref).ConnectionString);
+                        connection.Open();
+                        SqlCommand selectCommand = new SqlCommand("dbo.GetPetSummonTime", connection);
+                        selectCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                        selectCommand.Parameters.Add("@strAccount", SqlDbType.NVarChar, 50).Value = _account;
+                        selectCommand.Parameters.Add("@strServer", SqlDbType.NVarChar, 0x80).Value = _server;
+                        selectCommand.Parameters.Add("@idPet", SqlDbType.BigInt, 8).Value = _id;
+                        //create SQL reader
+
+                        reader = selectCommand.ExecuteReader();
+               
+                      /*  try
+                        {
+                            WorkSession.WriteStatus("PetSqlAdapter.Read() : 데이터베이스와 연결합니다");
+                            connection.Open();
+                            SqlDataAdapter adapter = new SqlDataAdapter(selectCommand);
+                            adapter.TableMappings.Add("Table", "pet");
+                            WorkSession.WriteStatus("PetSqlAdapter.Read() : DataSet 에 펫 정보를 채웁니다");
+                            DataSet dataSet = new DataSet();
+                            adapter.Fill(dataSet);
+                            adapter.Dispose();
+                            DataTable table = dataSet.Tables["pet"];
+                            if (table.Rows.Count != 1)
+                            {
+                                throw new Exception("PetSqlAdapter.Read() : [" + _id.ToString() + "/" + _account + "/" + _server + "] 소환 정보를 가져오지 못하였습니다.");
+                            }
+                            info.summon.remaintime = (int)table.Rows[0]["remaintime"];
+                            info.summon.lasttime = (long)table.Rows[0]["lasttime"];
+                            info.summon.expiretime = (long)table.Rows[0]["expiretime"];
+                            return info;
+                        }
+
+
+                        catch (SqlException exception)
+                        {
+                            ExceptionMonitor.ExceptionRaised(exception, _id);
+                            WorkSession.WriteStatus(exception.Message, exception.Number);
+                            return null;
+                        }
+                        finally
+                        {
+                            WorkSession.WriteStatus("PetSqlAdapter.Read() : 데이터베이스에 연결을 종료합니다");
+                            connection.Close();
+                        }
+                       * 
+                       */
+                        //Get the info from the reader. 
+                        PetInfo info = (PetInfo)base.ReadFromDB(_id);
+                        reader.Read();
+                        info.summon.remaintime = reader.GetInt32(0);
+                        info.summon.lasttime = reader.GetInt64(1);
+                        info.summon.expiretime = reader.GetInt32(2);
+                        if (reader != null)
+                        {
+                            try
+                            {
+                                reader.Close();
+                            }
+                            catch
+                            {
+                            }
+                        }
+                        try
+                        {
+                            connection.Close();
+                        }
+                        catch
+                        {
+                        }
+                        return info;
                     }
-                }
-                if (pet == null)
-                {
+                    WorkSession.WriteStatus("PetSqlAdapter.Read() : 계정, 서버 정보가 없어 소환 시간을 가져 오지 않습니다.");
                     return null;
                 }
-                if (base.IsExistData(_id))
+                catch (SqlException exception2)
                 {
-                    PetInfo info = (PetInfo)base.ReadFromDB(_id);
-                    info.summon.remaintime = pet.remaintime;
-                    info.summon.lasttime = pet.lasttime;
-                    return info;
+                    ExceptionMonitor.ExceptionRaised(exception2, _id);
+                    WorkSession.WriteStatus(exception2.Message, exception2.Number);
+                    return null;
                 }
+                catch (Exception exception3)
+                {
+                    ExceptionMonitor.ExceptionRaised(exception3, _id);
+                    WorkSession.WriteStatus(exception3.Message);
+                    return null;
+                }
+
+
+
             }
-            return null;
+            //If we are running in normal test mode use original code    
+            else
+            {
+                AccountrefPet pet = null;
+                Accountref accountref = _accountref.Read(_account);
+                if (accountref != null)
+                {
+                    foreach (AccountrefPet pet2 in accountref.pet)
+                    {
+                        if ((pet2.id == _id) && (pet2.server == _server))
+                        {
+                            pet = pet2;
+                            break;
+                        }
+                    }
+                    if (pet == null)
+                    {
+                        return null;
+                    }
+                    if (base.IsExistData(_id))
+                    {
+                        PetInfo info = (PetInfo)base.ReadFromDB(_id);
+                        info.summon.remaintime = pet.remaintime;
+                        info.summon.lasttime = pet.lasttime;
+                        return info;
+                    }
+                }
+                return null;
+            }
         }
 
         public bool Write(PetInfo _data)
